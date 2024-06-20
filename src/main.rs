@@ -1,48 +1,60 @@
-// use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::sync::Mutex;
+use std::vec;
+use uuid::Uuid;
 
-// #[actix_web::main]
-// async fn main() -> std::io::Result<()> {
-//     HttpServer::new(|| {
-//         App::new()
-//             .service(hello)
-//             .service(echo)
-//             .route("/hey", web::get().to(manual_hello))
-//     })
-//     .bind(("127.0.0.1", 8080))?
-//     .run()
-//     .await
-// }
-
-// #[get("/")]
-// async fn hello() -> impl Responder {
-//     HttpResponse::Ok().body("Hello world!")
-// }
-
-// #[post("/echo")]
-// async fn echo(req_body: String) -> impl Responder {
-//     HttpResponse::Ok().body(req_body)
-// }
-
-// async fn manual_hello() -> impl Responder {
-//     HttpResponse::Ok().body("Hey there!")
-// }
-use actix_web::{web, App, HttpServer, Responder};
-
-async fn index() -> impl Responder {
-    "Hello world!"
+#[derive(Serialize, Deserialize, Clone)]
+struct User{
+    id: Uuid,
+    tasks: Vec<Task>
 }
+
+#[derive(Serialize, Deserialize, Clone)]
+
+struct Task {
+    id : Uuid,
+    description: String,
+    status: String,
+}
+#[derive(Deserialize)]
+struct NewUser{}
+
+struct AppState {
+    users: Mutex<HashMap<Uuid, User>>,
+}
+
+
+async fn create_user(state: web::Data<AppState>, _user: web::Json<NewUser>) -> impl Responder{
+    let mut users = state.users.lock().unwrap();
+    let new_user_id = Uuid::new_v4();
+    users.insert(new_user_id, User{
+        id: new_user_id,
+        tasks: vec![],
+    });
+    HttpResponse::Created().json(users[&new_user_id].clone())
+
+}
+
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new().service(
-            // prefixes all resources and routes attached to it...
-            web::scope("/app")
-                // ...so this handles requests for `GET /app/index.html`
-                .route("/index.html", web::get().to(index)),
-        )
+    // Initialize shared application state
+    let state = web::Data::new(AppState {
+        users: Mutex::new(HashMap::new()),
+    });
+
+    // Start HTTP server and configure routes
+    HttpServer::new(move || {
+        App::new()
+            .app_data(state.clone())
+            .route("/users", web::post().to(create_user))
     })
     .bind(("127.0.0.1", 8080))?
     .run()
     .await
 }
+
+
