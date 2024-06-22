@@ -1,5 +1,3 @@
-// src/routes.rs
-
 use actix_web::{web, HttpResponse, Responder};
 use uuid::Uuid;
 
