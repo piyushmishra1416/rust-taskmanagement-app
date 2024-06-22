@@ -43,30 +43,30 @@ cargo test
 ## Usage
 - **Create User:**
 ``` bash
-curl -X POST -H "Content-Type: application/json" -d '{"username": "newuser"}' http://localhost:8080/users
+curl -X POST http://127.0.0.1:3000/users -d '{"username": "user1"}' -H "Content-Type: application/json"
 ```
 - **Create Task:**
 ``` bash
-curl -X POST -H "Content-Type: application/json" -d '{"title": "New Task", "description": "Task Description", "status": "Todo"}' http://localhost:8080/users/{user_id}/tasks
+curl -X POST http://127.0.0.1:3000/users/{user_id}/tasks -d '{"title": "Task 1", "description": "Description 1", "due_date": "2024-07-01", "status": "ToDo"}' -H "Content-Type: application/json"
 
 ```
 - **List Tasks:**
 ``` bash
-curl http://localhost:8080/users/{user_id}/tasks
+curl http://127.0.0.1:3000/users/{user_id}/tasks
 ```
 - **Get Task:**
 ``` bash
-curl http://localhost:8080/users/{user_id}/tasks/{task_id}
+curl http://127.0.0.1:3000/users/{user_id}/tasks/{task_id}
 
 ```
 - **Update Task:**
 ``` bash
-curl -X PUT -H "Content-Type: application/json" -d '{"title": "Updated Task", "description": "Updated Description", "status": "InProgress"}' http://localhost:8080/users/{user_id}/tasks/{task_id}
+curl -X PUT http://127.0.0.1:3000/users/{user_id}/tasks/{task_id} -d '{"title": "Updated Task", "description": "Updated Description", "due_date": "2024-07-02", "status": "InProgress"}' -H "Content-Type: application/json"
 
 ```
 - **Delete Task:**
 ``` bash
-curl -X DELETE http://localhost:8080/users/{user_id}/tasks/{task_id}
+curl -X DELETE http://127.0.0.1:3000/users/{user_id}/tasks/{task_id}
 ```
 
 ## Design Decisions
